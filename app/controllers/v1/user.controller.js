@@ -1,12 +1,11 @@
-const LOG = 'ProductController';
+const LOG = 'UserController';
 const _ = require('lodash')
 const moment = require('moment')
-const ProductModel = require('../../models/product')
-// const seed = require('../../../seeds/product_seed.json')
+const UserModel = require('../../models/user')
 
 module.exports = {
   createOrUpdate: async (req, res) => {
-    console.log(`┌─ ${LOG} : save product`);
+    console.log(`┌─ ${LOG} : save user`);
     const payload = req.body
     let whereClause = {}
     let existingRecord = {}
@@ -17,31 +16,31 @@ module.exports = {
       whereClause = {
         _id: payload._id
       }
-      existingRecord = await ProductModel.findOne(whereClause, '_id')
+      existingRecord = await UserModel.findOne(whereClause, '_id')
       if (!existingRecord) {
         return res.locals.helpers.jsonFormat(400, 'Invalid _id input', {})
       }
-      await ProductModel.updateOne(whereClause, payload)
+      await UserModel.updateOne(whereClause, payload)
     } else {
       payload.created_at = moment()
-      await ProductModel.create(payload)
+      await UserModel.create(payload)
     }
-    return res.locals.helpers.jsonFormat(200, 'Success to save new product', { existingRecord, whereClause })
+    return res.locals.helpers.jsonFormat(200, 'Success to save new user', { existingRecord, whereClause })
   },
   bulkCreate: async (req, res) => {
-    console.log(`┌─ ${LOG} : save bulk product`);
-    await ProductModel.insertMany(req.body.payload)
-    console.log(`└─ ${LOG} : save bulk product -> Success`);
-    return res.locals.helpers.jsonFormat(200, 'Success bulk save product')
+    console.log(`┌─ ${LOG} : save bulk user`);
+    await UserModel.insertMany(req.body.payload)
+    console.log(`└─ ${LOG} : save bulk user -> Success`);
+    return res.locals.helpers.jsonFormat(200, 'Success bulk save user')
   },
   deleteOne: async (req, res) => {
     const payload = req.body
     const whereClause = { _id: payload._id }
-    await ProductModel.deleteOne(whereClause)
-    return res.locals.helpers.jsonFormat(200, 'Success to delete product')
+    await UserModel.deleteOne(whereClause)
+    return res.locals.helpers.jsonFormat(200, 'Success to delete user')
   },
   getAll: async (req, res) => {
-    console.log(`┌─ ${LOG} : all product`);
+    console.log(`┌─ ${LOG} : all user`);
     let { page = 1, limit = 10, search = '' } = req.query
 
     // paging
@@ -57,25 +56,22 @@ module.exports = {
     }
     const fields = {
       _id: 1,
-      title: 1,
-      cover: 1,
-      avgRating: 1,
-      ratings: 1,
-      price: 1,
-      oldPrice: 1,
-      stock: 1
+      uid: 1,
+      username: 1,
+      password: 1,
+      email: 1
     }
 
     // execute query
-    const records = await ProductModel.find(conditions)
+    const records = await UserModel.find(conditions)
       .select(fields)
       .sort({ "updated_at": -1, "_id": -1 })
       .limit(limit)
       .skip(skip)
       .exec();
-    return res.locals.helpers.jsonFormat(200, 'Success get all product', { records })
+    return res.locals.helpers.jsonFormat(200, 'Success get all user', { records })
   },
   getOne: async (req, res) => {
-    console.log(`┌─ ${LOG} : single product`);
+    console.log(`┌─ ${LOG} : single user`);
   }
 }
