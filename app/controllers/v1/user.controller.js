@@ -40,36 +40,41 @@ module.exports = {
     return res.locals.helpers.jsonFormat(200, 'Success to delete user')
   },
   getAll: async (req, res) => {
-    console.log(`┌─ ${LOG} : all user`);
-    let { page = 1, limit = 10, search = '' } = req.query
+    try {
+      console.log(`┌─ ${LOG} : all user`);
+      let { page = 1, limit = 10, search = '' } = req.query
 
-    // paging
-    page = parseInt(page, 10)
-    limit = parseInt(limit, 10)
-    skip = (page - 1) * limit;
+      // paging
+      page = parseInt(page, 10)
+      limit = parseInt(limit, 10)
+      skip = (page - 1) * limit;
 
-    // set conditions
-    let conditions = {}
-    if (search != '') {
-      const searchRegex = new RegExp(search, 'i')
-      conditions = { title: searchRegex }
+      // set conditions
+      let conditions = {}
+      if (search != '') {
+        const searchRegex = new RegExp(search, 'i')
+        conditions = { title: searchRegex }
+      }
+      const fields = {
+        _id: 1,
+        uid: 1,
+        username: 1,
+        password: 1,
+        email: 1
+      }
+
+      // execute query
+      const records = await UserModel.find(conditions)
+        .select(fields)
+        .sort({ "updated_at": -1, "_id": -1 })
+        .limit(limit)
+        .skip(skip)
+        .exec();
+      return res.locals.helpers.jsonFormat(200, 'Success get all user', { records })
+    } catch (error) {
+      return res.locals.helpers.jsonFormat(200, 'error', error)
     }
-    const fields = {
-      _id: 1,
-      uid: 1,
-      username: 1,
-      password: 1,
-      email: 1
-    }
 
-    // execute query
-    const records = await UserModel.find(conditions)
-      .select(fields)
-      .sort({ "updated_at": -1, "_id": -1 })
-      .limit(limit)
-      .skip(skip)
-      .exec();
-    return res.locals.helpers.jsonFormat(200, 'Success get all user', { records })
   },
   detail: async (req, res) => {
     console.log(`┌─ ${LOG} : single user`);
