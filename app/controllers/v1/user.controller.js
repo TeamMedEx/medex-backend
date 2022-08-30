@@ -1,7 +1,7 @@
 const LOG = 'UserController';
 const _ = require('lodash')
 const moment = require('moment')
-const UserModel = require('../../models/user')
+const User = require('../../models/user')
 
 module.exports = {
   createOrUpdate: async (req, res) => {
@@ -16,27 +16,27 @@ module.exports = {
       whereClause = {
         _id: payload._id
       }
-      existingRecord = await UserModel.findOne(whereClause, '_id')
+      existingRecord = await User.findOne(whereClause, '_id')
       if (!existingRecord) {
         return res.locals.helpers.jsonFormat(400, 'Invalid _id input', {})
       }
-      await UserModel.updateOne(whereClause, payload)
+      await User.updateOne(whereClause, payload)
     } else {
       payload.created_at = moment()
-      await UserModel.create(payload)
+      await User.create(payload)
     }
     return res.locals.helpers.jsonFormat(200, 'Success to save new user', { existingRecord, whereClause })
   },
   bulkCreate: async (req, res) => {
     console.log(`┌─ ${LOG} : save bulk user`);
-    await UserModel.insertMany(req.body.payload)
+    await User.insertMany(req.body.payload)
     console.log(`└─ ${LOG} : save bulk user -> Success`);
     return res.locals.helpers.jsonFormat(200, 'Success bulk save user')
   },
   deleteOne: async (req, res) => {
     const payload = req.body
     const whereClause = { _id: payload._id }
-    await UserModel.deleteOne(whereClause)
+    await User.deleteOne(whereClause)
     return res.locals.helpers.jsonFormat(200, 'Success to delete user')
   },
   getAll: async (req, res) => {
@@ -64,7 +64,7 @@ module.exports = {
       }
 
       // execute query
-      const records = await UserModel.find(conditions)
+      const records = await User.find(conditions)
         .select(fields)
         .sort({ "updated_at": -1, "_id": -1 })
         .limit(limit)
@@ -76,8 +76,17 @@ module.exports = {
     }
 
   },
-  detail: async (req, res) => {
-    console.log(`┌─ ${LOG} : single user`);
-    return res.locals.helpers.jsonFormat(200, 'Success get detail',`mongodb+srv://${process.env.MONGODB_USER}:${process.env.MONGODB_PASSWORD}@${process.env.MONGODB_HOST}/${process.env.MONGODB_DB}`)
+  login: async (req, res) => {
+    console.log(`┌─ ${LOG} : login`);
+    const { username, email, password } = req.body
+    const user = await User.findOne({ $or: [{ username: username }, { email: email }] }, "_id username email password").exec()
+    if (user == null) {
+      return res.locals.helpers.jsonFormat(200, 'Invalid username / email')
+    }
+    const valid = await user.comparePassword(password)
+    if (!valid) {
+      return res.locals.helpers.jsonFormat(200, 'Invalid password')
+    }
+    return res.locals.helpers.jsonFormat(200, 'Success login', user)
   },
 }
