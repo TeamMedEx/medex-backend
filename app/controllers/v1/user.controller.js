@@ -71,7 +71,8 @@ module.exports = {
       .exec();
     return res.locals.helpers.jsonFormat(200, 'Success get all user', { records })
   },
-  getOne: async (req, res) => {
+  detail: async (req, res) => {
     console.log(`┌─ ${LOG} : single user`);
+    return res.locals.helpers.jsonFormat(200, 'Success get detail')
   }
 }
