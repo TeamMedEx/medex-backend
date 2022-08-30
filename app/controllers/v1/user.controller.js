@@ -78,6 +78,6 @@ module.exports = {
   },
   detail: async (req, res) => {
     console.log(`┌─ ${LOG} : single user`);
-    return res.locals.helpers.jsonFormat(200, 'Success get detail')
-  }
+    return res.locals.helpers.jsonFormat(200, 'Success get detail',`mongodb+srv://${process.env.MONGODB_USER}:${process.env.MONGODB_PASSWORD}@${process.env.MONGODB_HOST}/${process.env.MONGODB_DB}`)
+  },
 }
