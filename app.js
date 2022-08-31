@@ -25,7 +25,7 @@ app.use(bodyParser.json({ limit: '100mb' }))
 
 app.use((req, res, next) => {
   res.locals.helpers = {
-    jsonFormat: (httpCode, message, data = null) => {
+    jsonFormat: (httpCode, message, data = []) => {
       return res.status(httpCode).json({
         meta: {
           status: httpCode,
