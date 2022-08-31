@@ -81,11 +81,11 @@ module.exports = {
     const { username, email, password } = req.body
     const user = await User.findOne({ $or: [{ username: username }, { email: email }] }, "_id username email password").exec()
     if (user == null) {
-      return res.locals.helpers.jsonFormat(400, 'Invalid username / email', null)
+      return res.locals.helpers.jsonFormat(400, 'Invalid username / email')
     }
     const valid = await user.comparePassword(password)
     if (!valid) {
-      return res.locals.helpers.jsonFormat(400, 'Invalid password', null)
+      return res.locals.helpers.jsonFormat(400, 'Invalid password')
     }
     return res.locals.helpers.jsonFormat(200, 'Success login', user)
   },
