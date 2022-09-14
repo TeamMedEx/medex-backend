@@ -1,6 +1,7 @@
 const LOG = 'UserController';
 const _ = require('lodash')
 const moment = require('moment')
+const jwt = require('jsonwebtoken')
 const User = require('../../models/user')
 
 module.exports = {
@@ -60,7 +61,8 @@ module.exports = {
         uid: 1,
         username: 1,
         password: 1,
-        email: 1
+        email: 1,
+        refresh_token: 1
       }
 
       // execute query
@@ -69,6 +71,7 @@ module.exports = {
         .sort({ "updated_at": -1, "_id": -1 })
         .limit(limit)
         .skip(skip)
+        .lean()
         .exec();
       return res.locals.helpers.jsonFormat(200, 'Success get all user', { records })
     } catch (error) {
@@ -87,6 +90,18 @@ module.exports = {
     if (!valid) {
       return res.locals.helpers.jsonFormat(400, 'Invalid password')
     }
-    return res.locals.helpers.jsonFormat(200, 'Success login', user)
+    const token = jwt.sign(user.toJSON(), process.env.SECRET_KEY, {
+      expiresIn: 60 * 60
+    })
+    const refreshToken = jwt.sign({}, process.env.SECRET_KEY, {
+      expiresIn: 60 * 60 * 24
+    })
+    Object.assign(user, { refresh_token: refreshToken })
+    user.save()
+
+    return res.locals.helpers.jsonFormat(200, 'Success login', { token, refreshToken })
   },
+  refreshToken: async (req, res) => {
+    return res.locals.helpers.jsonFormat(200, 'Success refresh token', {})
+  }
 }

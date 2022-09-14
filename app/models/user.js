@@ -6,6 +6,10 @@ const userSchema = new mongoose.Schema({
   username: String,
   password: String,
   email: String,
+  name: String,
+  phone: String,
+  university: String,
+  refresh_token: String,
   created_at: {
     type: Date,
     default: Date.now
