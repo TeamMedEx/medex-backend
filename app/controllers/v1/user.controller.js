@@ -3,7 +3,11 @@ const _ = require('lodash')
 const moment = require('moment')
 const jwt = require('jsonwebtoken')
 const User = require('../../models/user')
+const { verifyToken } = require("../../utils/helper")
 
+
+const tokenExpiration = 60 * 60
+const refreshExpiration = 60 * 60 * 24
 module.exports = {
   store: async (req, res) => {
     console.log(`┌─ ${LOG} : save user`);
@@ -20,18 +24,17 @@ module.exports = {
     console.log(`┌─ ${LOG} : update user`);
     const { oid } = req.params
     const payload = req.body
-    if (oid == undefined) {
-      return res.locals.helpers.jsonFormat(400, 'Invalid oid input')
-    }
-    const existingRecord = await User.findOne({ _id: oid }, '_id')
-    if (!existingRecord) {
+
+    const user = await User.findOne({ _id: oid }, '_id')
+    if (!user) {
       return res.locals.helpers.jsonFormat(400, 'User not Found')
     }
-    Object.assign(existingRecord, payload)
-    await existingRecord.save()
+    Object.assign(user, payload)
+    await user.save()
     return res.locals.helpers.jsonFormat(200, 'Success to save user', {})
   },
   deleteOne: async (req, res) => {
+    console.log(`┌─ ${LOG} : Delete user`);
     const { oid } = req.params
     await User.deleteOne({ _id: oid })
     return res.locals.helpers.jsonFormat(200, 'Success to delete user')
@@ -78,7 +81,7 @@ module.exports = {
   login: async (req, res) => {
     console.log(`┌─ ${LOG} : login`);
     const { username, email, password } = req.body
-    const user = await User.findOne({ $or: [{ username: username }, { email: email }] }, "_id username email password").exec()
+    const user = await User.findOne({ $or: [{ username: username }, { email: email }] }, "_id username email").exec()
     if (user == null) {
       return res.locals.helpers.jsonFormat(400, 'Invalid username / email')
     }
@@ -87,10 +90,10 @@ module.exports = {
       return res.locals.helpers.jsonFormat(400, 'Invalid password')
     }
     const token = jwt.sign(user.toJSON(), process.env.SECRET_KEY, {
-      expiresIn: 60 * 60
+      expiresIn: tokenExpiration
     })
     const refreshToken = jwt.sign({}, process.env.SECRET_KEY, {
-      expiresIn: 60 * 60 * 24
+      expiresIn: refreshExpiration
     })
     Object.assign(user, { refresh_token: refreshToken })
     user.save()
@@ -98,6 +101,18 @@ module.exports = {
     return res.locals.helpers.jsonFormat(200, 'Success login', { token, refreshToken })
   },
   refreshToken: async (req, res) => {
-    return res.locals.helpers.jsonFormat(200, 'Success refresh token', {})
+    console.log(`┌─ ${LOG} : refresh token`)
+    const { refreshToken } = req.body
+    const valid = await verifyToken(refreshToken)
+    if (!valid) {
+      return res.locals.helpers.jsonFormat(401, 'Unauthorized! Refresh Token was expired!')
+    }
+    const user = await User.findOne({ refreshToken }, '_id username email')
+    const newAccessToken = jwt.sign(user.toJSON(), process.env.SECRET_KEY, {
+      expiresIn: refreshExpiration,
+    })
+    Object.assign(user, { refresh_token: null })
+    user.save()
+    return res.locals.helpers.jsonFormat(200, 'Success refresh token', { token: newAccessToken })
   }
 }
