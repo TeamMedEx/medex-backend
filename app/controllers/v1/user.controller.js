@@ -9,8 +9,12 @@ module.exports = {
     console.log(`┌─ ${LOG} : save user`);
     const payload = req.body
     Object.assign(payload, { updated_at: moment(), created_at: moment(), })
-    await User.create(payload)
-    return res.locals.helpers.jsonFormat(200, 'Success to save new user')
+    try {
+      await User.create(payload)
+      return res.locals.helpers.jsonFormat(200, 'Success to save new user')
+    } catch ({ message }) {
+      return res.locals.helpers.jsonFormat(400, message, null)
+    }
   },
   update: async (req, res) => {
     console.log(`┌─ ${LOG} : update user`);
