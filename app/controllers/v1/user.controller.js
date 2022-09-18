@@ -5,39 +5,31 @@ const jwt = require('jsonwebtoken')
 const User = require('../../models/user')
 
 module.exports = {
-  createOrUpdate: async (req, res) => {
+  store: async (req, res) => {
     console.log(`┌─ ${LOG} : save user`);
     const payload = req.body
-    let whereClause = {}
-    let existingRecord = {}
-
-    payload.updated_at = moment()
-
-    if (payload._id != undefined) {
-      whereClause = {
-        _id: payload._id
-      }
-      existingRecord = await User.findOne(whereClause, '_id')
-      if (!existingRecord) {
-        return res.locals.helpers.jsonFormat(400, 'Invalid _id input', {})
-      }
-      await User.updateOne(whereClause, payload)
-    } else {
-      payload.created_at = moment()
-      await User.create(payload)
-    }
-    return res.locals.helpers.jsonFormat(200, 'Success to save new user', { existingRecord, whereClause })
+    Object.assign(payload, { updated_at: moment(), created_at: moment(), })
+    await User.create(payload)
+    return res.locals.helpers.jsonFormat(200, 'Success to save new user')
   },
-  bulkCreate: async (req, res) => {
-    console.log(`┌─ ${LOG} : save bulk user`);
-    await User.insertMany(req.body.payload)
-    console.log(`└─ ${LOG} : save bulk user -> Success`);
-    return res.locals.helpers.jsonFormat(200, 'Success bulk save user')
+  update: async (req, res) => {
+    console.log(`┌─ ${LOG} : update user`);
+    const { oid } = req.params
+    const payload = req.body
+    if (oid == undefined) {
+      return res.locals.helpers.jsonFormat(400, 'Invalid oid input')
+    }
+    const existingRecord = await User.findOne({ _id: oid }, '_id')
+    if (!existingRecord) {
+      return res.locals.helpers.jsonFormat(400, 'User not Found')
+    }
+    Object.assign(existingRecord, payload)
+    await existingRecord.save()
+    return res.locals.helpers.jsonFormat(200, 'Success to save user', {})
   },
   deleteOne: async (req, res) => {
-    const payload = req.body
-    const whereClause = { _id: payload._id }
-    await User.deleteOne(whereClause)
+    const { oid } = req.params
+    await User.deleteOne({ _id: oid })
     return res.locals.helpers.jsonFormat(200, 'Success to delete user')
   },
   getAll: async (req, res) => {
@@ -58,11 +50,11 @@ module.exports = {
       }
       const fields = {
         _id: 1,
-        uid: 1,
         username: 1,
-        password: 1,
+        name: 1,
         email: 1,
-        refresh_token: 1
+        refresh_token: 1,
+        created_at: 1
       }
 
       // execute query
