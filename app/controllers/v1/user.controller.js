@@ -81,7 +81,7 @@ module.exports = {
   login: async (req, res) => {
     console.log(`┌─ ${LOG} : login`);
     const { username, email, password } = req.body
-    const user = await User.findOne({ $or: [{ username: username }, { email: email }] }, "_id username email").exec()
+    const user = await User.findOne({ $or: [{ username: username }, { email: email }] }, "_id username email password").exec()
     if (user == null) {
       return res.locals.helpers.jsonFormat(400, 'Invalid username / email')
     }
