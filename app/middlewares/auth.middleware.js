@@ -18,7 +18,7 @@ module.exports = {
       if (err) {
         return catchError(err, res)
       }
-      req.userId = decoded.id
+      req.userId = decoded._id
       next()
     })
   }

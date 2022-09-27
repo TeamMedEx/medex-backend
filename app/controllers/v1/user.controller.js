@@ -5,7 +5,6 @@ const jwt = require('jsonwebtoken')
 const User = require('../../models/user')
 const { verifyToken } = require("../../utils/helper")
 
-
 const tokenExpiration = 60 * 60
 const refreshExpiration = 60 * 60 * 24
 module.exports = {

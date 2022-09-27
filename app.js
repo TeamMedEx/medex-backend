@@ -3,6 +3,7 @@ const app = express()
 const bodyParser = require('body-parser')
 const helperUtils = require('./app/utils/helper')
 const userRouter = require('./app/routes/v1/user')
+const examRouter = require('./app/routes/v1/exam')
 const mongoose = require('mongoose')
 require('dotenv').config()
 
@@ -40,6 +41,7 @@ app.use((req, res, next) => {
 })
 
 app.use('/api/v1', userRouter)
+app.use('/api/v1', examRouter)
 
 app.get('/404', function (req, res, next) {
   next();
