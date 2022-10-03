@@ -38,6 +38,10 @@ const examSchema = new mongoose.Schema({
     type: String,
     default: "REGULAR"
   },
+  category: {
+    type: String,
+    default: "GENERAL"
+  },
   minimum_score: {
     type: Number,
     default: 60
@@ -53,7 +57,10 @@ const examSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   },
+  thumbnail: String,
   updated_at: Date,
+  duration: Number,
+  membership: String
 });
 
 examSchema.pre("save", function (next) {

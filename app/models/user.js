@@ -27,6 +27,8 @@ const userSchema = new mongoose.Schema({
     default: Date.now
   },
   updated_at: Date,
+  exam_limit: Number,
+  membership: String
 });
 
 userSchema.pre("save", function (next) {
