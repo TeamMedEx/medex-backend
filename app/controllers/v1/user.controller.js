@@ -96,8 +96,8 @@ module.exports = {
     })
     Object.assign(user, { refresh_token: refreshToken })
     user.save()
-
-    return res.locals.helpers.jsonFormat(200, 'Success login', { token, refreshToken })
+    const expiresAt = moment().add(tokenExpiration, 'seconds')
+    return res.locals.helpers.jsonFormat(200, 'Success login', { token, refreshToken, expiresAt })
   },
   refreshToken: async (req, res) => {
     console.log(`┌─ ${LOG} : refresh token`)
