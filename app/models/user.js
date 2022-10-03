@@ -14,6 +14,10 @@ const userSchema = new mongoose.Schema({
     unique: true,
     required: true
   },
+  signup_source: {
+    type: String,
+    default: "APP"
+  },
   name: String,
   phone: String,
   university: String,
