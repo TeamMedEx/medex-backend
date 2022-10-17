@@ -60,7 +60,8 @@ const examSchema = new mongoose.Schema({
   thumbnail: String,
   updated_at: Date,
   duration: Number,
-  membership: String
+  membership: String,
+  limit: String
 });
 
 examSchema.pre("save", function (next) {

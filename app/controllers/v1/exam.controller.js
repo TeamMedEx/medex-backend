@@ -55,6 +55,9 @@ module.exports = {
         title: 1,
         description: 1,
         type: 1,
+        thumbnail: 1,
+        duration: 1,
+        membership: 1,
         created_at: 1,
         updated_at: 1,
       }
