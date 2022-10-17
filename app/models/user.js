@@ -21,6 +21,7 @@ const userSchema = new mongoose.Schema({
   name: String,
   phone: String,
   university: String,
+  profile_picture: String,
   refresh_token: String,
   created_at: {
     type: Date,
@@ -28,7 +29,9 @@ const userSchema = new mongoose.Schema({
   },
   updated_at: Date,
   exam_limit: Number,
-  membership: String
+  membership: String,
+  signin_source: { type: String, enum: ['EMAIL', 'GOOGLE'] },
+  sso_refresh_token: String,
 });
 
 userSchema.pre("save", function (next) {
