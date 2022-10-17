@@ -59,6 +59,7 @@ module.exports = {
         username: 1,
         name: 1,
         email: 1,
+        source: 1,
         refresh_token: 1,
         created_at: 1
       }
@@ -80,7 +81,7 @@ module.exports = {
   login: async (req, res) => {
     console.log(`┌─ ${LOG} : login`);
     const { username, email, password } = req.body
-    const user = await User.findOne({ $or: [{ username: username }, { email: email }] }, "_id username email password").exec()
+    const user = await User.findOne({ $or: [{ username: username }, { email: email }] }, "_id username email password name").exec()
     if (user == null) {
       return res.locals.helpers.jsonFormat(400, 'Invalid username / email')
     }
@@ -88,14 +89,16 @@ module.exports = {
     if (!valid) {
       return res.locals.helpers.jsonFormat(400, 'Invalid password')
     }
-    const token = jwt.sign(user.toJSON(), process.env.SECRET_KEY, {
-      expiresIn: tokenExpiration
-    })
     const refreshToken = jwt.sign({}, process.env.SECRET_KEY, {
       expiresIn: refreshExpiration
     })
     Object.assign(user, { refresh_token: refreshToken })
     user.save()
+    const record = user.toJSON()
+    delete record.password
+    const token = jwt.sign(record, process.env.SECRET_KEY, {
+      expiresIn: tokenExpiration
+    })
     const expiresAt = moment().add(tokenExpiration, 'seconds')
     return res.locals.helpers.jsonFormat(200, 'Success login', { token, refreshToken, expiresAt })
   },
