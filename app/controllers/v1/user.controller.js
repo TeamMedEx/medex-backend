@@ -11,7 +11,14 @@ module.exports = {
   store: async (req, res) => {
     console.log(`┌─ ${LOG} : save user`);
     const payload = req.body
+    const user = await User.findOne({ email: payload.email, username: payload.username }, '_id source').lean()
+
+    if (user != null) {
+      return res.locals.helpers.jsonFormat(400, message, { code: `registered_by_${user.source == undefined ? "email" : user.source.toLowerCase()}` })
+    }
+
     Object.assign(payload, { updated_at: moment(), created_at: moment(), })
+
     try {
       await User.create(payload)
       return res.locals.helpers.jsonFormat(200, 'Success to save new user')
