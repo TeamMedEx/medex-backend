@@ -55,7 +55,7 @@ module.exports = {
         title: 1,
         description: 1,
         type: 1,
-        thumbnail: 1,
+        // thumbnail: 1,
         duration: 1,
         membership: 1,
         created_at: 1,
@@ -112,5 +112,35 @@ module.exports = {
     } catch (error) {
       return res.locals.helpers.jsonFormat(500, 'error', error)
     }
-  }
+  },
+  detail: async (req, res) => {
+    try {
+      console.log(`┌─ ${LOG} : detail exam`);
+      const { oid } = req.params
+      // set conditions
+      const exam = await Exam.findOne(
+        { _id: oid },
+        {
+          _id: 1,
+          title: 1,
+          description: 1,
+          category: 1,
+          minimum_score: 1,
+          questions: {
+            _id: 1,
+            title: 1,
+            type: 1,
+            options: 1,
+          },
+          duration: 1,
+        }
+      ).lean()
+      if (!exam) {
+        return res.locals.helpers.jsonFormat(400, 'Exam not Found')
+      }
+      return res.locals.helpers.jsonFormat(200, 'Success get exam', exam)
+    } catch (error) {
+      return res.locals.helpers.jsonFormat(500, 'error', error)
+    }
+  },
 }
