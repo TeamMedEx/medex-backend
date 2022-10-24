@@ -55,6 +55,7 @@ module.exports = {
         title: 1,
         description: 1,
         type: 1,
+        uestion_count: { $size: "$questions" },
         // thumbnail: 1,
         duration: 1,
         membership: 1,
@@ -72,6 +73,7 @@ module.exports = {
         .exec();
       return res.locals.helpers.jsonFormat(200, 'Success get all exam', records)
     } catch (error) {
+      console.log(error)
       return res.locals.helpers.jsonFormat(500, 'error', error)
     }
   },
