@@ -55,7 +55,7 @@ module.exports = {
         title: 1,
         description: 1,
         type: 1,
-        uestion_count: { $size: "$questions" },
+        question_count: { $size: "$questions" },
         // thumbnail: 1,
         duration: 1,
         membership: 1,
@@ -87,9 +87,9 @@ module.exports = {
       if (!exam) {
         return res.locals.helpers.jsonFormat(400, 'Exam not Found')
       }
-      if (answers < exam.questions.length) {
-        return res.locals.helpers.jsonFormat(400, 'Invalid answers count')
-      }
+      // if (answers < exam.questions.length) {
+      //   return res.locals.helpers.jsonFormat(400, 'Invalid answers count')
+      // }
       let correctCount = 0
       const answerReport = [...answers]
       const answerKey = {}
