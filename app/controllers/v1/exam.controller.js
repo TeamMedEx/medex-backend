@@ -66,7 +66,7 @@ module.exports = {
       // execute query
       const records = await Exam.find(conditions)
         .select(fields)
-        .sort({ "updated_at": -1, "_id": -1 })
+        .sort({ "_id": -1 })
         .limit(limit)
         .skip(skip)
         .lean()
@@ -130,9 +130,11 @@ module.exports = {
           minimum_score: 1,
           questions: {
             _id: 1,
+            description: 1,
             title: 1,
             type: 1,
             options: 1,
+            correct_answer: 1
           },
           duration: 1,
         }

@@ -8,10 +8,7 @@ const optionsSchema = new mongoose.Schema({
   image: String
 })
 const questionSchema = new mongoose.Schema({
-  title: {
-    type: String,
-    required: true
-  },
+  title: String,
   description: String,
   type: {
     type: String,
@@ -67,7 +64,6 @@ const examSchema = new mongoose.Schema({
 examSchema.pre("save", function (next) {
   const exam = this
   if (this.isNew) {
-    // exam.password = hash
     for (let row of exam.questions) {
       const ansID = row.options.find(({ value }) => value === row.correct_answer);
       row.correct_answer = ansID == undefined ? row.options[0]._id : ansID._id
@@ -76,6 +72,16 @@ examSchema.pre("save", function (next) {
   } else {
     return next()
   }
+})
+examSchema.pre("insertMany", function (next, docs) {
+  for (let exam of docs) {
+    for (let row of exam.questions) {
+      row.options = row.options.map(item => ({ _id: new mongoose.Types.ObjectId(), value: item }))
+      const ansID = row.options.find(({ value }) => value === row.correct_answer);
+      row.correct_answer = ansID == undefined ? row.options[0]._id : ansID._id
+    }
+  }
+  next()
 })
 const ExamModel = mongoose.model('exams', examSchema);
 
